@@ -3,8 +3,6 @@ import logging
 import socket
 
 
-logging.basicConfig(level=logging.DEBUG)
-
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
