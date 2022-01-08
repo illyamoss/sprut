@@ -32,7 +32,7 @@ def send_file_to_client(
     with open(path_to_file, "r") as file:
         for line in file.readlines():
             client.send(line.encode())
-    client.send(b"\x00")  # End of a file
+    client.send(b"\x00")  # Mark end of a file
 
 
 def recieve_files_from_server(
@@ -41,23 +41,9 @@ def recieve_files_from_server(
 ) -> None:
     with open(filename, "wb") as file:
         data = server.recv(1024)
-        while data != b"\x00":
-            file.write(data)
+        while data not in b"\x00":
+            file.write(data.removesuffix(b"\x00"))
             data = server.recv(1024)
-
-
-# def data_from_client(
-#     client: socket.socket
-# ) -> tuple[socket.socket, bytes]:
-#     while True:
-#         data = client.recv(1024)
-#         logging.info(f"Data from client: {data}")
-
-#         if not data:
-#             server.close()
-#             break
-
-#         yield client, data
 
 
 def send_file(

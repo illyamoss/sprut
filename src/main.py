@@ -1,27 +1,3 @@
-# elif sys_args[0] == "recieve":
-#     sock.connect(("127.0.0.1", 8000))
-
-#     logging.info("Client connected")
-
-#     accept = input("Accept files?(Y/n): ").lower()
-
-#     match accept:
-#         case "y":
-#             sock.send("data accepted".encode())
-#         case _:
-#             sock.close()
-#             exit()
-
-#     while True:
-#         filename = sock.recv(1024).decode()
-#         if not filename:
-#             break
-#         recieve_files_from_server(server_socket=sock, filename=filename)
-
-#     logging.info("Data succussful transferred")
-
-
-# sock.close()
 import logging
 import sys
 
@@ -49,7 +25,7 @@ if __name__ == "__main__":
                 logging.info("Sending files...")
                 for file_ in files:
                     send_file_to_client(client=client, path_to_file=file_)
-                logging.info("Data succussful transferred")
+                print("Data succussful transferred")
 
             client.close()
 
@@ -68,9 +44,10 @@ if __name__ == "__main__":
                 filename = server.recv(1024).decode()
                 if not filename:
                     break
+                print(f"File: {filename} delivered")
                 recieve_files_from_server(server=server, filename=filename)
 
-            logging.info("Data succussful transferred")
+            print("Data succussful transferred")
             server.close()
         case _:
             print("Wrong Command")
