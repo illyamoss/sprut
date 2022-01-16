@@ -1,3 +1,4 @@
+from io import TextIOWrapper
 import os
 import socket
 
@@ -25,21 +26,20 @@ class Server:
         else:
             client.send("Correct passphrase".encode())
         self.client = client
-    
+
     def get_client_code(self) -> str:
         host, port = self.__sock.getsockname()[0], self.__sock.getsockname()[1]
         return f"{host}:{port}-{self.__passphrase}"
 
-    def send_files_to_client(self, files: list) -> None:
+    def send_files_to_client(self, files: list[TextIOWrapper]) -> None:
         """ Send files from server to client """
         if self.client.recv(1024).decode() != "data accepted":
             return
     
-        for path_to_file in files:
-            self.client.send(os.path.basename(path_to_file).encode())  # Send filename to client
-            with open(path_to_file, "r") as file:
-                for line in file.readlines():
-                    self.client.send(line.encode())
+        for file_ in files:
+            self.client.send(file_.name.encode())  # Send filename to client
+            for line in file_.readlines():
+                self.client.send(line.encode())
             self.client.send(b"\x00")  # Mark end of a file
 
     def close(self) -> None:
