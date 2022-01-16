@@ -1,5 +1,4 @@
-# sprut
-Sprut - file transfer
+# Sprut - file transfer
 Securely and simply transfer files from one computer to another 📦
 
 Send files:
