@@ -1,12 +1,12 @@
-from io import TextIOWrapper
-import os
 import socket
 
-from .crypto import generate_passphrase
+from io import TextIOWrapper
+
+from .crypt import generate_passphrase, EndToEndEncryption
 
 
 class Server:
-    def __init__(self) -> None:
+    def __init__(self, encryption: EndToEndEncryption = None) -> None:
         self.__passphrase = generate_passphrase()
 
         self.__sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
