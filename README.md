@@ -1,4 +1,10 @@
-![alt text](https://github.com/qXytreXp/images/blob/master/Sprut.jpg)
+<p align="center">
+<img
+    src="https://github.com/qXytreXp/images/blob/master/Sprut.jpg"
+    width="550px" height="500px" border="0" alt="sprut">
+<br>
+</p>
+
 # Sprut - files transfer. 
 `sprut` is a tool that allow securely and simply transfer files from one computer to another 📦
 - Allows **any two computers** to transfer data;
