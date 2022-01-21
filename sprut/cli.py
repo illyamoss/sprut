@@ -16,17 +16,24 @@ send.add_argument(
     "files", 
     type=FileType("r"), 
     nargs="+",
-    help="send files, for example: sprut send file1.txt file2.txt")
+    help="send files, for example: sprut send file1.txt file2.txt.")
 send.add_argument(
     "--localnet", 
     "-l",
     help="specify if the computer to which you want to transfer \
-        files is in the local network (default in global network)")
+        files is in the local network (default in global network).")
+send.add_argument(
+    "--rsakeysize",
+    "-k",
+    type=int,
+    default=2048,
+    help="Set a size of the RSA encryption key (default: 2048).")
 
 recieve.add_argument(
     "code",
     type=str, 
-    help="for example: sprut recieve <code for connect to server>")
+    help="Code for connection to server, example: " + \
+    "sprut recieve <code>.")
 
 
 def run():
