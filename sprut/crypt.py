@@ -3,52 +3,46 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes, serialization
 
 
-RSA_KEY_SIZE = 2048
-
-
 class EndToEndEncryption:
-    def __init__(
-        self, 
-        private_key: rsa.RSAPrivateKey = None, 
-        public_key: rsa.RSAPublicKey = None
-    ) -> None:
-        self.__private_key = private_key
-        self.__public_key = public_key
+    def __init__(self, rsa_key_size: int) -> None:
+        self.__rsa_key_size = rsa_key_size
+
+        self.__private_key = rsa.generate_private_key(
+            public_exponent=65537,
+            key_size=self.__rsa_key_size,
+            backend=default_backend()
+        )
+        self.__public_key = self.__private_key.public_key()
 
         self.__public_key_from_peer: rsa.RSAPublicKey
 
-    @classmethod
-    def generate_keys(cls):
-        private_key = rsa.generate_private_key(
-            public_exponent=65537,
-            key_size=RSA_KEY_SIZE,
-            backend=default_backend())
-        public_key = private_key.public_key()
+    def get_max_rsa_chipher_size(self) -> int:
+        """ Get a maximum data size for encryption/decryption using RSA. """
+        return (self.__rsa_key_size + 7) // 8
 
-        return cls(private_key, public_key)
+    def get_public_key(self) -> bytes:
+        return self.__public_key.public_bytes(
+            encoding=serialization.Encoding.DER,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        )
 
-    @property.getter
-    def public_key(self) -> bytes:
-        return self.__public_key
-
-    @property.setter
-    def public_key_from_peer(self, key: bytes) -> None:
+    def set_public_key_from_peer(self, key: bytes) -> None:
         self.__public_key_from_peer = serialization.load_der_public_key(
-                key,
-                backend=default_backend())
+            key, backend=default_backend()
+        )
 
-    def encrypt_str(self, string: str) -> bytes:
+    def encrypt(self, plaintext: bytes) -> bytes:
         return self.__public_key_from_peer.encrypt(
-            string.encode(),
+            plaintext,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),
                 label=None
             ))
 
-    def decrypt_str(self, encrypted_str: bytes) -> bytes:
+    def decrypt(self, encrypted_data: bytes) -> bytes:
         return self.__private_key.decrypt(
-            encrypted_str,
+            encrypted_data,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),

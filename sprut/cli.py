@@ -1,7 +1,6 @@
-# import sys
 from argparse import ArgumentParser, FileType
 
-from .tcp import Server, Client
+from .tcp import Server, Client, FileSender, FileReciever
 
 
 parser = ArgumentParser(
@@ -14,18 +13,15 @@ send = subparser.add_parser("send")
 recieve = subparser.add_parser("recieve")
 
 send.add_argument(
-    "--local", 
-    "-l", 
-    dest="localnet",
-    default=False,
-    type=bool,
-    help="specify if the computer to which you want to transfer \
-        files is in the local network (default in global network)")
-send.add_argument(
     "files", 
     type=FileType("r"), 
     nargs="+",
-    help="send files, for example: sprut send --files file1.txt file2.txt")
+    help="send files, for example: sprut send file1.txt file2.txt")
+send.add_argument(
+    "--localnet", 
+    "-l",
+    help="specify if the computer to which you want to transfer \
+        files is in the local network (default in global network)")
 
 recieve.add_argument(
     "code",
@@ -37,8 +33,13 @@ def run():
     args = parser.parse_args()
 
     if args.command == "send":
+        if args.localnet is None:
+            localnet = True
+        else:
+            localnet = False
+
+        server = Server(rsa_key_size=2048, localnet=localnet)
         print("Sprut server started")
-        server = Server(localnet=args.localnet)
 
         client_code = server.get_client_code()
 
@@ -48,11 +49,15 @@ def run():
 
         print(f"Code is: {client_code}\n\n"
             "On the other computer run:\n"
-            f"sprut recieve --code {client_code}\n")
+            f"sprut recieve {client_code}\n")
 
         server.accept_client_connection()
-        server.send_files(files=args.files)
-        print("Data succussful transferred")
+
+        if server.recv(1024).decode() == "data accepted":
+            FileSender(sock=server).send_files(files=args.files)
+            print("Data succussful transferred")
+        else:
+            print("Client not accepted data...")
 
         server.close()
     elif args.command == "recieve":
@@ -62,9 +67,11 @@ def run():
 
         print("Connection...")
         try:
-            client = Client(host=host, port=port, passphrase=passphrase)
-
-            if client.recieve_data().decode() != "Correct passphrase":
+            client = Client(host=host, port=port, rsa_key_size=2048, passphrase=passphrase)
+        except ConnectionRefusedError:
+            print("Wrong code/passphrase.")
+        else:
+            if client.recv(1024).decode() != "Correct passphrase":
                 print("Wrong code/passphrase.")
                 client.close()
                 return
@@ -73,14 +80,13 @@ def run():
             accept = input("Accept files?(Y/n): ").lower()
 
             if accept == "y":
-                client.send_data(b"data accepted")
-                client.recieve_files_from_server()
+                client.send(b"data accepted")
+                FileReciever(sock=client).recieve_files()
 
                 print("Data succussful transferred")
                 client.close()
             else:
+                client.send(b"data not accepted")
                 client.close()
-        except ConnectionRefusedError:
-            print("Wrong code/passphrase.")
     else:
         print("Wrong Command")
