@@ -1,12 +1,40 @@
 ![alt text](https://github.com/qXytreXp/images/blob/master/Sprut.jpg)
-# Sprut - file transfer. Securely and simply transfer files from one computer to another 📦
+# Sprut - files transfer. 
+`sprut` is a tool that allow securely and simply transfer files from one computer to another 📦
+- Allows **any two computers** to transfer data;
+- enables **platforms:** Linux;
+- allows **multiple file** transfers;
+- allows **resuming transfers** that are interrupted;
+- provides **end-to-end encryption** (using RSA);
+- only CLI.
+
+# Install
+ToDo
 
 # Usage
 Send files:
 ```
-sprut --command send --files file.txt
+$ sprut send file.txt
+Sprut server started
+Sending files:
+file.txt
+Code is: 9.63.3.55:41797_go-twenty-nation
+
+On the other computer run:
+sprut recieve 9.63.3.55:41797_go-twenty-nation
+
+Connection: ('<address>', 57612)
+
+Data succussful transferred
+Good bye BOSS! Have a nice day.
 ```
 Recieve files:
 ```
-sprut --command recieve --code <code for server>
+$ sprut recieve 9.63.3.55:41797_go-twenty-nation
+Connection...
+Connected to the server
+Accept files?(Y/n): y
+File: file.txt delivered
+Data succussful transferred
+Good bye BOSS! Have a nice day.
 ```
