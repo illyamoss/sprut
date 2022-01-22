@@ -20,6 +20,7 @@ send.add_argument(
 send.add_argument(
     "--localnet", 
     "-l",
+    action="store_true",
     help="specify if the computer to which you want to transfer \
         files is in the local network (default in global network).")
 send.add_argument(
@@ -40,12 +41,7 @@ def run():
     args = parser.parse_args()
 
     if args.command == "send":
-        if args.localnet is None:
-            localnet = True
-        else:
-            localnet = False
-
-        server = Server(rsa_key_size=2048, localnet=localnet)
+        server = Server(rsa_key_size=2048, localnet=args.localnet)
         print("Sprut server started")
 
         client_code = server.get_client_code()
