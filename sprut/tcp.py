@@ -72,9 +72,9 @@ class Server:
 
     def exchange_rsa_pub_keys(self) -> None:
         # Send server public key to client
-        self.__client.send(self.e2ee.get_public_key())
+        self.__client.send(self.e2ee.public_key)
         # Recieve public key from client
-        self.e2ee.set_public_key_from_peer(self.__client.recv(1024))
+        self.e2ee.public_key = self.__client.recv(1024)
 
     def close(self) -> None:
         self.__sock.close()
@@ -108,10 +108,10 @@ class Client:
         return self.e2ee.decrypt(data)
 
     def exchange_rsa_pub_keys(self) -> None:
-        # Send server public key to client
-        self.__sock.send(self.e2ee.get_public_key())
-        # Recieve public key from client
-        self.e2ee.set_public_key_from_peer(self.__sock.recv(1024))
+        # Send server public key to server
+        self.__sock.send(self.e2ee.public_key)
+        # Recieve public key from server
+        self.e2ee.public_key = self.__sock.recv(1024)
 
     def close(self):
         self.__sock.close()

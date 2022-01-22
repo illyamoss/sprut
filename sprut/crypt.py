@@ -14,25 +14,25 @@ class EndToEndEncryption:
         )
         self.__public_key = self.__private_key.public_key()
 
-        self.__public_key_from_peer: rsa.RSAPublicKey
-
-    def get_max_rsa_chipher_size(self) -> int:
-        """ Get a maximum data size for encryption/decryption using RSA. """
-        return (self.__rsa_key_size + 7) // 8
-
-    def get_public_key(self) -> bytes:
+    @property
+    def public_key(self) -> bytes:
         return self.__public_key.public_bytes(
             encoding=serialization.Encoding.DER,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         )
 
-    def set_public_key_from_peer(self, key: bytes) -> None:
-        self.__public_key_from_peer = serialization.load_der_public_key(
+    @public_key.setter
+    def public_key(self, key: bytes):
+        self.__public_key = serialization.load_der_public_key(
             key, backend=default_backend()
         )
+    
+    def get_max_rsa_chipher_size(self) -> int:
+        """ Get a maximum data size for encryption/decryption using RSA. """
+        return (self.__rsa_key_size + 7) // 8
 
     def encrypt(self, plaintext: bytes) -> bytes:
-        return self.__public_key_from_peer.encrypt(
+        return self.__public_key.encrypt(
             plaintext,
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
