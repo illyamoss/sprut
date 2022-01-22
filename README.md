@@ -1,7 +1,7 @@
 <p align="center">
 <img
     src="https://github.com/qXytreXp/images/blob/master/Sprut.jpg"
-    width="550px" height="500px" border="0" alt="sprut">
+    width="380px" height="290px" border="0" alt="sprut">
 <br>
 </p>
 
