@@ -26,7 +26,7 @@ class EndToEndEncryption:
             self.__public_key = public_key
 
         else:
-            raise TypeError("...")
+            raise TypeError("You passed a keys type in an unsupported type.")
     
     @classmethod
     def generate_keys(cls, rsa_key_size):
