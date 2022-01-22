@@ -14,7 +14,7 @@ class Server:
     """
     def __init__(
         self, 
-        *, 
+        *,
         rsa_key_size: int, 
         passphrase_words_count: int = 3, 
         localnet: bool = False
@@ -31,7 +31,7 @@ class Server:
         self.__sock.bind(("0.0.0.0", 0))  
         self.__sock.listen(1)
 
-        self.e2ee = EndToEndEncryption(rsa_key_size=rsa_key_size)
+        self.e2ee = EndToEndEncryption.generate_keys(rsa_key_size=rsa_key_size)
         self.max_rsa_chipher_size = self.e2ee.get_max_rsa_chipher_size()
 
         self.__client: socket.socket
@@ -87,7 +87,8 @@ class Client:
         self.__sock = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_STREAM)
         self.__sock.connect((host, port))
-        self.e2ee = EndToEndEncryption(rsa_key_size=rsa_key_size)
+
+        self.e2ee = EndToEndEncryption.generate_keys(rsa_key_size=rsa_key_size)
         self.max_rsa_chipher_size = self.e2ee.get_max_rsa_chipher_size()
 
         self.exchange_rsa_pub_keys()
