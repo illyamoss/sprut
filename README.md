@@ -1,3 +1,6 @@
+<h1 align="center">Sprut - files transfer.</h1>
+
+
 <p align="center">
 <img
     src="https://github.com/qXytreXp/images/blob/master/Sprut.jpg"
@@ -5,7 +8,6 @@
 <br>
 </p>
 
-# Sprut - files transfer. 
 `sprut` is a tool that allow securely and simply transfer files from one computer to another 📦
 - Allows **any two computers** to transfer data;
 - enables **platforms:** Linux, MacOS, Windows(ToDo);
