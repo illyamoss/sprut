@@ -8,10 +8,11 @@
 # Sprut - files transfer. 
 `sprut` is a tool that allow securely and simply transfer files from one computer to another 📦
 - Allows **any two computers** to transfer data;
-- enables **platforms:** Linux;
+- enables **platforms:** Linux, MacOS, Windows(ToDo);
+- provides **end-to-end encryption** using RSA Asymmetric Algorithm;
+- data does not pass through third-party servers;
 - allows **multiple file** transfers;
 - allows **resuming transfers** that are interrupted;
-- provides **end-to-end encryption** (using RSA);
 - only CLI.
 
 # Install
