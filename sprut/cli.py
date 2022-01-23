@@ -4,37 +4,41 @@ from .tcp import Server, Client, FileSender, FileReciever
 
 
 parser = ArgumentParser(
-    prog="Sprut", 
+    prog="Sprut",
     description="Securely and simply transfer \
-    files from one computer to another 📦")
+    files from one computer to another 📦",
+)
 
 subparser = parser.add_subparsers(dest="command")
 send = subparser.add_parser("send")
 recieve = subparser.add_parser("recieve")
 
 send.add_argument(
-    "files", 
-    type=FileType("r"), 
+    "files",
+    type=FileType("r"),
     nargs="+",
-    help="send files, for example: sprut send file1.txt file2.txt.")
+    help="send files, for example: sprut send file1.txt file2.txt.",
+)
 send.add_argument(
-    "--localnet", 
+    "--localnet",
     "-l",
     action="store_true",
     help="specify if the computer to which you want to transfer \
-        files is in the local network (default in global network).")
+        files is in the local network (default in global network).",
+)
 send.add_argument(
     "--rsakeysize",
     "-k",
     type=int,
     default=2048,
-    help="Set a size of the RSA encryption key (default: 2048).")
+    help="Set a size of the RSA encryption key (default: 2048).",
+)
 
 recieve.add_argument(
     "code",
-    type=str, 
-    help="Code for connection to server, example: " + \
-    "sprut recieve <code>.")
+    type=str,
+    help="Code for connection to server, example: " + "sprut recieve <code>.",
+)
 
 
 def run():
@@ -50,9 +54,11 @@ def run():
         for file_ in args.files:
             print(file_.name)
 
-        print(f"Code is: {client_code}\n\n"
+        print(
+            f"Code is: {client_code}\n\n"
             "On the other computer run:\n"
-            f"sprut recieve {client_code}\n")
+            f"sprut recieve {client_code}\n"
+        )
 
         server.accept_client_connection()
 
@@ -70,7 +76,9 @@ def run():
 
         print("Connection...")
         try:
-            client = Client(host=host, port=port, rsa_key_size=2048, passphrase=passphrase)
+            client = Client(
+                host=host, port=port, rsa_key_size=2048, passphrase=passphrase
+            )
         except ConnectionRefusedError:
             print("Wrong code/passphrase.")
         else:

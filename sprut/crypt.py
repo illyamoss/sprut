@@ -5,35 +5,36 @@ from cryptography.hazmat.primitives import hashes, serialization
 
 class EndToEndEncryption:
     def __init__(
-        self, 
-        rsa_key_size: int, 
+        self,
+        rsa_key_size: int,
         private_key: rsa.RSAPrivateKey | bytes,
-        public_key: rsa.RSAPublicKey | bytes
+        public_key: rsa.RSAPublicKey | bytes,
     ) -> None:
         self.__rsa_key_size = rsa_key_size
 
         if isinstance(private_key, bytes) and isinstance(public_key, bytes):
             self.__private_key = serialization.load_der_private_key(
-                private_key, backend=default_backend()
+                private_key, backend=default_backend(), password=None
             )
             self.__public_key = serialization.load_der_public_key(
                 public_key, backend=default_backend()
             )
 
-        elif isinstance(private_key, rsa.RSAPrivateKey) \
-        and isinstance(public_key, rsa.RSAPublicKey):
+        elif isinstance(private_key, rsa.RSAPrivateKey) and isinstance(
+            public_key, rsa.RSAPublicKey
+        ):
             self.__private_key = private_key
             self.__public_key = public_key
 
         else:
             raise TypeError("You passed a keys type in an unsupported type.")
-    
+
     @classmethod
     def generate_keys(cls, rsa_key_size):
         private_key = rsa.generate_private_key(
             public_exponent=65537,
             key_size=rsa_key_size,
-            backend=default_backend()
+            backend=default_backend(),
         )
         public_key = private_key.public_key()
 
@@ -43,7 +44,7 @@ class EndToEndEncryption:
     def public_key(self) -> bytes:
         return self.__public_key.public_bytes(
             encoding=serialization.Encoding.DER,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
         )
 
     @public_key.setter
@@ -51,9 +52,9 @@ class EndToEndEncryption:
         self.__public_key = serialization.load_der_public_key(
             key, backend=default_backend()
         )
-    
+
     def get_max_rsa_chipher_size(self) -> int:
-        """ Get a maximum data size for encryption/decryption using RSA. """
+        """Get a maximum data size for encryption/decryption using RSA."""
         return (self.__rsa_key_size + 7) // 8
 
     def encrypt(self, plaintext: bytes) -> bytes:
@@ -62,8 +63,9 @@ class EndToEndEncryption:
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),
-                label=None
-            ))
+                label=None,
+            ),
+        )
 
     def decrypt(self, encrypted_data: bytes) -> bytes:
         return self.__private_key.decrypt(
@@ -71,5 +73,6 @@ class EndToEndEncryption:
             padding.OAEP(
                 mgf=padding.MGF1(algorithm=hashes.SHA256()),
                 algorithm=hashes.SHA256(),
-                label=None
-            ))
+                label=None,
+            ),
+        )

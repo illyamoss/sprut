@@ -7,28 +7,29 @@ from .utils import generate_passphrase, get_public_ip, split_string_by_bytes
 
 
 class Server:
-    """ The server is designed for a single connection. 
-    After, if client connected to a server, make a secure connection. 
-    Client send passphrase to the server, if the server passphrase is correct, 
+    """The server is designed for a single connection.
+    After, if client connected to a server, make a secure connection.
+    Client send passphrase to the server, if the server passphrase is correct,
     transfer the data to the client.
     """
+
     def __init__(
-        self, 
+        self,
         *,
-        rsa_key_size: int, 
-        passphrase_words_count: int = 3, 
-        localnet: bool = False
+        rsa_key_size: int,
+        passphrase_words_count: int = 3,
+        localnet: bool = False,
     ) -> None:
         self.localnet = localnet
         # The server passphrase
         self.__passphrase = generate_passphrase(passphrase_words_count)
 
         self.__sock = socket.socket(
-            family=socket.AF_INET, 
-            type=socket.SOCK_STREAM)
+            family=socket.AF_INET, type=socket.SOCK_STREAM
+        )
         self.__sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # The port is 0 to connect to any free port
-        self.__sock.bind(("0.0.0.0", 0))  
+        self.__sock.bind(("0.0.0.0", 0))
         self.__sock.listen(1)
 
         self.e2ee = EndToEndEncryption.generate_keys(rsa_key_size=rsa_key_size)
@@ -85,7 +86,8 @@ class Client:
         self, *, host: str, port: int, rsa_key_size: int, passphrase: str
     ) -> None:
         self.__sock = socket.socket(
-            family=socket.AF_INET, type=socket.SOCK_STREAM)
+            family=socket.AF_INET, type=socket.SOCK_STREAM
+        )
         self.__sock.connect((host, port))
 
         self.e2ee = EndToEndEncryption.generate_keys(rsa_key_size=rsa_key_size)
@@ -121,9 +123,9 @@ class Client:
 class FileSender:
     def __init__(self, sock: Server) -> None:
         self.sock = sock
-    
+
     def send_files(self, files: list[TextIOWrapper]) -> None:
-        """ Send files from server to client """
+        """Send files from server to client"""
 
         for file_ in files:
             self.sock.send(file_.name.encode())  # Send filename to client
@@ -157,6 +159,6 @@ class FileReciever:
                     file_.write(data)
                     data = self.sock.recv()
             print(f"File: {filename} delivered")
-    
+
     def recieve_folders(self) -> None:
         ...
