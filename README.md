@@ -47,3 +47,22 @@ File: file.txt delivered
 Data succussful transferred
 Good bye BOSS! Have a nice day.
 ```
+# For developers
+For those who want to complete the project.
+You must have Python version 3.10 and higher installed.
+Make a clone of this repository.
+```
+$ git clone https://github.com/qXytreXp/sprut
+```
+Navigate to the project directory and create a virtual environment.
+```
+$ cd sprut && python3.10 -m venv env
+```
+Set all dependencies for the project.
+```
+$ python3.10 -m pip install -r requirements-dev.txt
+```
+After you have completed the project, check whether you have not broken the ready-made logic.
+```
+$ pytest -v -x tests/
+```
