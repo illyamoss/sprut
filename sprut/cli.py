@@ -88,7 +88,7 @@ def run():
             accept = input("Accept files?(Y/n): ").lower()
 
             if accept == "y":
-                reciever.sendto(b"data accepted", addr=reciever.sender_addr)
+                reciever.sendto(b"data accepted", addr=reciever.sender_addr, encrypt=False)
                 reciever.exchange_rsa_pub_keys(addr=reciever.sender_addr)
                 reciever.recieve_files()
 

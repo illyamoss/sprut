@@ -103,28 +103,33 @@ class Peer:
         self.e2ee = EndToEndEncryption.generate_keys(rsa_key_size=2048)
         self.max_rsa_chipher_size = self.e2ee.get_max_rsa_chipher_size()
 
-    def sendto(self, data: bytes, addr: tuple[str, int] = None) -> None:
+    def sendto(
+        self, data: bytes, addr: tuple[str, int] = None, encrypt: bool = False
+    ) -> None:
         if addr is None:
             addr = self.address
-        # hash_ = self.e2ee.encrypt(data)
-        # self._sock.sendto(hash_, addr)
+        
+        if encrypt:
+            data = self.e2ee.encrypt(data)
         self._sock.sendto(data, addr)
 
-    def recv(self, bufsize: int = None) -> bytes:
+    def recvfrom(self, bufsize: int = None, decrypt: bool = False) -> bytes:
         if bufsize is None:
             bufsize = self.max_rsa_chipher_size
 
-        data = self._sock.recvfrom(bufsize)[0]
+        data, addr = self._sock.recvfrom(bufsize)
         if not data:
             return data
-        # return self.e2ee.decrypt(data)
-        return data
+        
+        if decrypt:
+            data = self.e2ee.decrypt(data)
+        return data, addr
 
     def exchange_rsa_pub_keys(self, addr: tuple[str, int] = None) -> None:
         # Send server public key to peer
-        self._sock.sendto(self.e2ee.public_key, addr)
+        self.sendto(self.e2ee.public_key, addr)
         # Recieve public key from peer
-        self.e2ee.public_key = self._sock.recvfrom(1024)[0]
+        self.e2ee.public_key = self.recvfrom(1024)[0]
 
     def close(self):
         self._sock.close()
@@ -139,7 +144,7 @@ class Sender(Peer):
         self._create_room()
 
     def accept_reciever(self) -> None:
-        data, addr = self._sock.recvfrom(1024)
+        data, addr = self.recvfrom()
 
         if data.decode() != "data accepted":
             raise RecieverError("Data not accepted")
@@ -152,24 +157,24 @@ class Sender(Peer):
         """Send files from reciever to server"""
 
         for file_ in files:
-            self.sendto(file_.name.encode(), addr=self.reciever_addr)  # Send filename to client
+            self.sendto(file_.name.encode(), addr=self.reciever_addr, encrypt=True)  # Send filename to client
             for line in file_.readlines():
                 if len(line.encode()) > self.max_rsa_chipher_size:
                     for splited_line in split_string_by_bytes(
                         line, bytes_count=self.max_rsa_chipher_size
                     ):
-                        self.sendto(splited_line.encode(), addr=self.reciever_addr)
+                        self.sendto(splited_line.encode(), addr=self.reciever_addr, encrypt=True)
                 else:
-                    self.sendto(line.encode(), addr=self.reciever_addr)
-            self.sendto(b"\x00", addr=self.reciever_addr)  # Mark end of a file
-        self.sendto(b"\x000", addr=self.reciever_addr)  # Mark end of a files
+                    self.sendto(line.encode(), addr=self.reciever_addr, encrypt=True)
+            self.sendto(b"\x00", addr=self.reciever_addr, encrypt=True)  # Mark end of a file
+        self.sendto(b"\x000", addr=self.reciever_addr, encrypt=True)  # Mark end of a files
 
     def get_passphrase_for_room(self) -> str:
         return self._passphrase_for_room
 
     def _create_room(self) -> None:
-        self._sock.sendto(b"create room", DEFAULT_SPRUT_SERVER_ADDRESS)
-        self._passphrase_for_room = self._sock.recvfrom(1024)[0].decode()
+        self.sendto(b"create room", DEFAULT_SPRUT_SERVER_ADDRESS)
+        self._passphrase_for_room = self.recvfrom()[0].decode()
 
 
 class Reciever(Peer):
@@ -179,8 +184,8 @@ class Reciever(Peer):
         self._get_sender_addr(passphrase_for_room)
 
     def _get_sender_addr(self, passphrase_for_room: str) -> None:
-        self._sock.sendto(passphrase_for_room.encode(), self.address)
-        if (addr := self._sock.recvfrom(1024)[0].decode()) != "Passphrase is incorrect":
+        self.sendto(passphrase_for_room.encode(), self.address)
+        if (addr := self.recvfrom()[0].decode()) != "Passphrase is incorrect":
             ip, port = addr.split(":")[0], int(addr.split(":")[1])
             self.sender_addr = (ip, port)
         else:
@@ -188,15 +193,15 @@ class Reciever(Peer):
 
     def recieve_files(self) -> None:
         while True:
-            file_ = self.recv()
+            file_ = self.recvfrom(decrypt=True)[0]
             if file_ == b"\x000":
                 break
 
             with open(file_.decode(), "wb") as f:
-                data = self.recv()
+                data = self.recvfrom(decrypt=True)[0]
                 while data != b"\x00":
                     f.write(data)
-                    data = self.recv()
+                    data = self.recvfrom(decrypt=True)[0]
             print(f"File: {file_.decode()} delivered")
 
 
