@@ -1,8 +1,12 @@
+# import logging
+
 from argparse import ArgumentParser, FileType
 
 from .exception import PassphraseIsInCorrect, RecieverError
-
 from .tcp import Sender, Reciever
+
+
+# logging.basicConfig(level=logging.DEBUG)
 
 
 parser = ArgumentParser(
@@ -21,21 +25,6 @@ send.add_argument(
     nargs="+",
     help="send files, for example: sprut send file1.txt file2.txt.",
 )
-send.add_argument(
-    "--localnet",
-    "-l",
-    action="store_true",
-    help="specify if the computer to which you want to transfer \
-        files is in the local network (default in global network).",
-)
-send.add_argument(
-    "--rsakeysize",
-    "-k",
-    type=int,
-    default=2048,
-    help="Set a size of the RSA encryption key (default: 2048).",
-)
-
 recieve.add_argument(
     "code",
     type=str,

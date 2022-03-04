@@ -3,6 +3,9 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import hashes, serialization
 
 
+MAX_RSA_ENCRYPTION_SIZE = 190
+
+
 class EndToEndEncryption:
     def __init__(
         self,
@@ -53,8 +56,8 @@ class EndToEndEncryption:
             key, backend=default_backend()
         )
 
-    def get_max_rsa_chipher_size(self) -> int:
-        """Get a maximum data size for encryption/decryption using RSA."""
+    def get_rsa_key_size(self) -> int:
+        """RSA key size in bytes"""
         return (self.__rsa_key_size + 7) // 8
 
     def encrypt(self, plaintext: bytes) -> bytes:

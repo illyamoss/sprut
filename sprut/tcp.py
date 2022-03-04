@@ -8,11 +8,8 @@ from enum import Enum
 
 from .exception import PassphraseIsInCorrect, RecieverError
 
-from .crypt import EndToEndEncryption
+from .crypt import EndToEndEncryption, MAX_RSA_ENCRYPTION_SIZE
 from .utils import generate_passphrase, split_string_by_bytes
-
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 DEFAULT_SPRUT_SERVER_ADDRESS = ("127.0.0.1", 8000)
@@ -47,7 +44,6 @@ class Server:
         self._sock = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM
         )
-        self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._sock.bind((host, port))
 
         logging.info("Sprut server started")
@@ -101,13 +97,14 @@ class Peer:
         )
 
         self.e2ee = EndToEndEncryption.generate_keys(rsa_key_size=2048)
-        self.max_rsa_chipher_size = self.e2ee.get_max_rsa_chipher_size()
 
     def sendto(
         self, data: bytes, addr: tuple[str, int] = None, encrypt: bool = False
     ) -> None:
         if addr is None:
             addr = self.address
+
+        logging.info(data)
         
         if encrypt:
             data = self.e2ee.encrypt(data)
@@ -115,7 +112,7 @@ class Peer:
 
     def recvfrom(self, bufsize: int = None, decrypt: bool = False) -> bytes:
         if bufsize is None:
-            bufsize = self.max_rsa_chipher_size
+            bufsize = self.e2ee.get_rsa_key_size()
 
         data, addr = self._sock.recvfrom(bufsize)
         if not data:
@@ -154,16 +151,17 @@ class Sender(Peer):
         self.reciever_addr = addr
 
     def send_files(self, files: list[TextIOWrapper]) -> None:
-        """Send files from reciever to server"""
+        """Send files from sender to reciever"""
 
         for file_ in files:
             self.sendto(file_.name.encode(), addr=self.reciever_addr, encrypt=True)  # Send filename to client
             for line in file_.readlines():
-                if len(line.encode()) > self.max_rsa_chipher_size:
-                    for splited_line in split_string_by_bytes(
-                        line, bytes_count=self.max_rsa_chipher_size
+                if len(line.encode()) > MAX_RSA_ENCRYPTION_SIZE:
+                    for splited_bytes in split_string_by_bytes(
+                        line, bytes_count=MAX_RSA_ENCRYPTION_SIZE
                     ):
-                        self.sendto(splited_line.encode(), addr=self.reciever_addr, encrypt=True)
+                        logging.info(len(splited_bytes))
+                        self.sendto(splited_bytes, addr=self.reciever_addr, encrypt=True)
                 else:
                     self.sendto(line.encode(), addr=self.reciever_addr, encrypt=True)
             self.sendto(b"\x00", addr=self.reciever_addr, encrypt=True)  # Mark end of a file
@@ -206,5 +204,7 @@ class Reciever(Peer):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)
+
     server = Server()
     server.accept_connections()
