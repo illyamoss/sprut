@@ -17,13 +17,6 @@ def test_generate_passphrase(passphrase_words_count) -> None:
     assert len(random_words.split("-")) == passphrase_words_count
 
 
-def test_get_public_ip() -> None:
-    assert get_public_ip() == (requests.get("https://canhazip.com/")
-        .content.decode()
-        .removesuffix("\n")
-    )
-
-
 @pytest.mark.parametrize(
     "string, bytes_count, result", 
     [

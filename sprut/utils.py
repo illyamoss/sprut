@@ -8,7 +8,7 @@ WORDS_LIST_TXT = (
 )
 
 
-def generate_passphrase(passphrase_words_count: int) -> str:
+def generate_passphrase(words_count: int) -> str:
     r = requests.get(WORDS_LIST_TXT)
     words = r.content.decode().split()
 
@@ -17,16 +17,8 @@ def generate_passphrase(passphrase_words_count: int) -> str:
             # Words with the symbol ', create a problem
             # so we'll just replace it out.
             random.choice(words).replace("'", "")
-            for _ in range(passphrase_words_count)
+            for _ in range(words_count)
         ]
-    )
-
-
-def get_public_ip() -> str:
-    return (
-        requests.get("https://canhazip.com/")
-        .content.decode()
-        .removesuffix("\n")
     )
 
 
