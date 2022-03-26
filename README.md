@@ -27,19 +27,19 @@ $ sprut send file.txt
 Sprut server started
 Sending files:
 file.txt
-Code is: 9.63.3.55:41797_go-twenty-nation
+Code is: go-twenty-nation
 
 On the other computer run:
-sprut recieve 9.63.3.55:41797_go-twenty-nation
+sprut recieve go-twenty-nation
 
-Connection: ('<address>', 57612)
+Connection: ('9.63.3.55', 57612)
 
 Data succussful transferred
 Good bye BOSS! Have a nice day.
 ```
 Recieve files:
 ```
-$ sprut recieve 9.63.3.55:41797_go-twenty-nation
+$ sprut recieve go-twenty-nation
 Connection...
 Connected to the server
 Accept files?(Y/n): y
