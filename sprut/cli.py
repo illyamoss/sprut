@@ -3,7 +3,7 @@
 from argparse import ArgumentParser, FileType
 
 from .exception import PassphraseIsInCorrect, RecieverError
-from .tcp import Sender, Reciever
+from .net import Sender, Reciever
 
 
 # logging.basicConfig(level=logging.DEBUG)
