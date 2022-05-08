@@ -84,8 +84,8 @@ class Server:
 
 
 class Peer:
-    def __init__(self, *, address: tuple) -> None:
-        self.address = address
+    def __init__(self, *, sprut_server_address: tuple) -> None:
+        self.sprut_server_address = sprut_server_address
         self._sock = socket.socket(
             family=socket.AF_INET, type=socket.SOCK_DGRAM
         )
@@ -96,7 +96,7 @@ class Peer:
         self, data: bytes, addr: tuple[str, int] = None, encrypt: bool = False
     ) -> None:
         if addr is None:
-            addr = self.address
+            addr = self.sprut_server_address
 
         logging.info(data)
         
@@ -128,7 +128,7 @@ class Peer:
 
 class Sender(Peer):
     def __init__(self) -> None:
-        super().__init__(address=DEFAULT_SPRUT_SERVER_ADDRESS)
+        super().__init__(sprut_server_address=DEFAULT_SPRUT_SERVER_ADDRESS)
         
         self._passphrase_for_room: str = None
 
@@ -171,7 +171,7 @@ class Sender(Peer):
 
 class Reciever(Peer):
     def __init__(self, passphrase_for_room: str) -> None:
-        super().__init__(address=DEFAULT_SPRUT_SERVER_ADDRESS)
+        super().__init__(sprut_server_address=DEFAULT_SPRUT_SERVER_ADDRESS)
 
         self._get_sender_addr(passphrase_for_room)
 
