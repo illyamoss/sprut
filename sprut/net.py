@@ -4,7 +4,6 @@ import socket
 from io import TextIOWrapper
 
 from dataclasses import dataclass
-from enum import Enum
 
 from .exception import PassphraseIsInCorrect, RecieverError
 
@@ -14,11 +13,6 @@ from .utils import generate_passphrase, split_string_by_bytes
 
 DEFAULT_SPRUT_SERVER_ADDRESS = ("127.0.0.1", 8000)
 DEFAULT_PASSPHRASE_WORDS_COUNT = 3
-
-
-class TypesOfClient(Enum):
-    SENDER = "sender"
-    RECIEVER = "reciever"
 
 
 @dataclass
