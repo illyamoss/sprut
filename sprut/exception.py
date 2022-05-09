@@ -1,6 +1,6 @@
-class PassphraseIsInCorrect(Exception):
+class RecieverError(Exception):
     pass
 
 
-class RecieverError(Exception):
+class P2PError(Exception):
     pass

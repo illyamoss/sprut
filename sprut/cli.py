@@ -1,12 +1,10 @@
-# import logging
-
 from argparse import ArgumentParser, FileType
 
-from .exception import PassphraseIsInCorrect, RecieverError
-from .net import Sender, Reciever
+from .exception import RecieverError
+from .net import Sender, Receiver
 
 
-# logging.basicConfig(level=logging.DEBUG)
+DEFAULT_SPRUT_SERVER_ADDRESS = ("127.0.0.1", 8000)
 
 
 parser = ArgumentParser(
@@ -32,12 +30,12 @@ recieve.add_argument(
 )
 
 
-def run():
+def run() -> None:
     args = parser.parse_args()
 
     if args.command == "send":
         try:
-            sender = Sender()
+            sender = Sender(sprut_server_address=DEFAULT_SPRUT_SERVER_ADDRESS)
         except ConnectionRefusedError:
             print("Problem with sprut server. Sorry=(")
             exit()
@@ -57,34 +55,33 @@ def run():
 
         try:
             sender.accept_reciever()
-            sender.exchange_rsa_pub_keys(addr=sender.reciever_addr)
             sender.send_files(files=args.files)
             
             print("Data succussful transferred")
         except RecieverError:
             print("Reciever not accepted data...")
 
-        sender.close()
     elif args.command == "recieve":
         passphrase = args.code
 
         print("Connection...")
         try:
-            reciever = Reciever(passphrase_for_room=passphrase)
-        except PassphraseIsInCorrect:
+            receiver = Receiver(
+                passphrase_for_room=passphrase, 
+                sprut_server_address=DEFAULT_SPRUT_SERVER_ADDRESS
+            )
+        except ValueError:
             print("Wrong code/passphrase.")
         else:
             accept = input("Accept files?(Y/n): ").lower()
 
             if accept == "y":
-                reciever.sendto(b"data accepted", addr=reciever.sender_addr, encrypt=False)
-                reciever.exchange_rsa_pub_keys(addr=reciever.sender_addr)
-                reciever.recieve_files()
+                receiver.accept_files()
+                receiver.recieve_files()
 
                 print("Data succussful transferred")
-                reciever.close()
             else:
-                reciever.sendto(b"data not accepted", addr=reciever.sender_addr)
-                reciever.close()
+                receiver.not_accept_files()
+                print("Data not accepted")
     else:
         print("Wrong Command")
