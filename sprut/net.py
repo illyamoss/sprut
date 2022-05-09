@@ -102,7 +102,6 @@ class PeerToPeer:
 
         self.sessions[addr] = e2ee
 
-
     def close_all_sessions(self) -> None:
         for session in self.sessions:
             del session
